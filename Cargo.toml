@@ -1,0 +1,15 @@
+[package]
+name = "bevy-pong"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+resolver = "2"
+
+[dependencies]
+# revert to bevy = "0.6.1" before release
+bevy = { version = "0.6.0", features = ["dynamic"] }
+bevy-inspector-egui = "0.8.2"
+bevy_rapier2d = "*"
+rand = "0.7.3"
