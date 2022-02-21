@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
+use heron::prelude::*;
+use crate::physics::Layer;
 
 pub struct BallPlugin;
 
@@ -23,28 +24,16 @@ fn setup (mut commands: Commands) {
       ..Default::default()
     }
   )
-  .insert_bundle(
-    RigidBodyBundle {
-      position: Vec2::new(0.0, 0.0).into(),
-      velocity: RigidBodyVelocity {
-        linvel: Vec2::new(1.0, 2.0).into(),
-        angvel: 0.4
-      }.into(),
-      forces: RigidBodyForces {
-        force: Vec2::new(1000.0, 2000.0).into(),
-        gravity_scale: 2.0,
-        ..Default::default()
-      }.into(),
-      ..Default::default()
-    }
-  )
-  .insert_bundle(
-    ColliderBundle {
-      shape: ColliderShape::ball(1.).into(),
-      ..Default::default()
-    }
-  )
-  .insert(RigidBodyPositionSync::Discrete)
+  .insert(RigidBody::Dynamic)
+  .insert(CollisionShape::Sphere { radius: 0.75 })
+  .insert(Velocity::from_linear(Vec3::X * 10.0))
+  .insert(Acceleration::from_linear(Vec3::X * 5.0))
+  .insert(PhysicMaterial { friction: 1.0, density: 10.0, ..Default::default() })
+  .insert(RotationConstraints::lock())
+  .insert(CollisionLayers::none()
+    .with_group(Layer::Ball)
+    .with_mask(Layer::World)
+    .with_mask(Layer::Paddle))
   .insert(Ball);
 }
 

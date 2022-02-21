@@ -1,9 +1,9 @@
 use bevy::prelude::*;
+use heron::prelude::*;
+use crate::physics::Layer;
 
 #[derive(Component)]
-pub struct Paddle {
-  position: Vec2,
-}
+pub struct Paddle;
 
 pub fn spawn_paddle (
   mut commands: Commands,
@@ -13,7 +13,8 @@ pub fn spawn_paddle (
   commands.spawn_bundle(
     SpriteBundle {
       sprite: Sprite {
-        color: Color::hex("ffffff").unwrap(),
+        // color: Color::hex("ffffff").unwrap(),
+        color: Color::rgba(255., 255., 255., 0.0),
         ..Default::default()
       },
       transform: Transform {
@@ -24,6 +25,23 @@ pub fn spawn_paddle (
       ..Default::default()
     }
   )
-  .insert(Paddle { position: position })
+  .insert(RigidBody::Dynamic)
+  .insert(CollisionShape::Cuboid { 
+    half_extends: Vec3::new(0.5, 2.5, 1.0),
+    border_radius: None
+  })
+  // .insert(Velocity::from_linear(Vec3::X * 2.0))
+  // .insert(Acceleration::from_linear(Vec3::X * 1.0))
+  .insert(PhysicMaterial { 
+    friction: 1.0,
+    density: 9999.0,
+    restitution: 1.0,
+  })
+  .insert(RotationConstraints::lock())
+  .insert(CollisionLayers::none()
+    .with_group(Layer::Paddle)
+    .with_mask(Layer::World)
+    .with_mask(Layer::Ball))
+  .insert(Paddle)
   .insert(component);
 }

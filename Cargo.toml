@@ -12,4 +12,5 @@ resolver = "2"
 bevy = { version = "0.6.0", features = ["dynamic"] }
 bevy-inspector-egui = "0.8.2"
 bevy_rapier2d = "*"
+heron = { version = "2.0.1", features = ["2d", "debug-2d"] }
 rand = "0.7.3"

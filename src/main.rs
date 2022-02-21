@@ -1,22 +1,18 @@
+use bevy::prelude::*;
+use bevy_inspector_egui::WorldInspectorPlugin;
+
+mod physics;
 mod camera;
 mod ball;
 mod paddle;
 mod player;
+mod adversary;
 
-use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
-use bevy_inspector_egui::WorldInspectorPlugin;
-use paddle::*;
-use player::*;
-use camera::*;
+use physics::AppPhysicsPlugin;
+use player::PlayerPlugin;
+use adversary::AdversaryPlugin;
+use camera::CameraPlugin;
 use ball::BallPlugin;
-
-fn setup (
-  commands: Commands,
-  q: Query<&mut OrthographicProjection>,
-) {
-  spawn_paddle(commands, Vec2::new(-26., 0.), Player);
-}
 
 fn main() {
   App::new()
@@ -30,10 +26,11 @@ fn main() {
     )
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .add_plugins(DefaultPlugins)
-    .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
     .add_plugin(WorldInspectorPlugin::new())
+    .add_plugin(AppPhysicsPlugin)
+    .add_plugin(CameraPlugin)
     .add_plugin(BallPlugin)
-    .add_startup_system(setup_camera)
-    .add_startup_system(setup)
+    .add_plugin(PlayerPlugin)
+    .add_plugin(AdversaryPlugin)
     .run();
 }

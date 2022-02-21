@@ -1,6 +1,15 @@
 use bevy::{prelude::*, render::camera::{ScalingMode, DepthCalculation, WindowOrigin}};
 
-pub fn setup_camera (
+pub struct CameraPlugin;
+
+impl Plugin for CameraPlugin {
+  fn build(&self, app: &mut App) {
+    app
+      .add_startup_system(camera_setup);
+  }
+}
+
+fn camera_setup (
   mut commands: Commands,
   mut windows: ResMut<Windows>,
 ) {
