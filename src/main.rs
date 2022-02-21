@@ -7,12 +7,14 @@ mod ball;
 mod paddle;
 mod player;
 mod adversary;
+mod ui;
 
 use physics::AppPhysicsPlugin;
 use player::PlayerPlugin;
 use adversary::AdversaryPlugin;
 use camera::CameraPlugin;
 use ball::BallPlugin;
+use ui::UIPlugin;
 
 fn main() {
   App::new()
@@ -29,8 +31,10 @@ fn main() {
     .add_plugin(WorldInspectorPlugin::new())
     .add_plugin(AppPhysicsPlugin)
     .add_plugin(CameraPlugin)
+    .add_plugin(UIPlugin)
     .add_plugin(BallPlugin)
     .add_plugin(PlayerPlugin)
     .add_plugin(AdversaryPlugin)
+    .add_system(bevy::input::system::exit_on_esc_system)
     .run();
 }
