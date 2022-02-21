@@ -16,5 +16,5 @@ pub struct Player;
 fn player_setup (
   commands: Commands,
 ) {
-  spawn_paddle(commands, Vec2::new(26., 0.), Player);
+  spawn_paddle(commands, Vec2::new(25., 0.), Player);
 }

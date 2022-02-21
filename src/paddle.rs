@@ -13,8 +13,7 @@ pub fn spawn_paddle (
   commands.spawn_bundle(
     SpriteBundle {
       sprite: Sprite {
-        // color: Color::hex("ffffff").unwrap(),
-        color: Color::rgba(255., 255., 255., 0.0),
+        color: Color::hex("ffffff").unwrap(),
         ..Default::default()
       },
       transform: Transform {

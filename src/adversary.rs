@@ -16,5 +16,5 @@ pub struct Adversary;
 fn adversary_setup (
   commands: Commands,
 ) {
-  spawn_paddle(commands, Vec2::new(-26., 0.), Adversary);
+  spawn_paddle(commands, Vec2::new(-25., 0.), Adversary);
 }
