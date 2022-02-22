@@ -6,6 +6,7 @@ pub enum Layer {
   World,
   Ball,
   Paddle,
+  GoalLine,
 }
 
 pub struct AppPhysicsPlugin;
