@@ -39,7 +39,8 @@ pub fn spawn_paddle (
   .insert(RotationConstraints::lock())
   .insert(CollisionLayers::none()
     .with_group(Layer::Paddle)
-    .with_masks(&[Layer::World, Layer::Ball]))
+    .with_masks(&[Layer::World, Layer::Ball])
+  )
   .insert(Paddle)
   .insert(component);
 }

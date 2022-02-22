@@ -33,7 +33,8 @@ fn setup (mut commands: Commands) {
   .insert(RotationConstraints::lock())
   .insert(CollisionLayers::none()
     .with_group(Layer::Ball)
-    .with_masks(&[Layer::World, Layer::Paddle]))
+    .with_masks(&[Layer::World, Layer::Paddle])
+  )
   .insert(Ball);
 }
 
@@ -52,9 +53,12 @@ fn detect_collisions(
 ) {
   for event in events.iter() {
     if let CollisionEvent::Started(data1, data2) = event {
+      // println!("event: {:?}", data1);
       for (ball, mut velocity) in q.iter_mut() {
         if ball == data1.rigid_body_entity() || ball == data2.rigid_body_entity() {
-          velocity.linear = velocity.linear + Vec3::new(40., 5., 1.);
+          let normal = data2.normals().first().unwrap();
+          println!("velocity: {:?}", velocity.linear);
+          velocity.linear = Vec3::new(normal.x, normal.y, 1.) * 100. * (1./60.);
         }
       }
     };
