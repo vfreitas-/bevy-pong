@@ -29,8 +29,8 @@ pub fn spawn_paddle (
     half_extends: Vec3::new(0.5, 2.5, 1.0),
     border_radius: None
   })
-  // .insert(Velocity::from_linear(Vec3::X * 2.0))
-  // .insert(Acceleration::from_linear(Vec3::X * 1.0))
+  .insert(Velocity::from_linear(Vec3::ZERO))
+  .insert(Acceleration::from_linear(Vec3::Y * 2.0))
   .insert(PhysicMaterial { 
     friction: 1.0,
     density: 9999.0,
