@@ -7,7 +7,8 @@ pub struct BallPlugin;
 impl Plugin for BallPlugin {
   fn build(&self, app: &mut App) {
     app
-      .add_startup_system(setup);
+      .add_startup_system(setup)
+      .add_system(detect_collisions);
   }
 }
 
@@ -27,13 +28,12 @@ fn setup (mut commands: Commands) {
   .insert(RigidBody::Dynamic)
   .insert(CollisionShape::Sphere { radius: 0.75 })
   .insert(Velocity::from_linear(Vec3::X * 10.0))
-  .insert(Acceleration::from_linear(Vec3::X * 5.0))
+  .insert(Acceleration::from_linear(Vec3::new(1., 1., 1.)))
   .insert(PhysicMaterial { friction: 1.0, density: 10.0, ..Default::default() })
   .insert(RotationConstraints::lock())
   .insert(CollisionLayers::none()
     .with_group(Layer::Ball)
-    .with_mask(Layer::World)
-    .with_mask(Layer::Paddle))
+    .with_masks(&[Layer::World, Layer::Paddle]))
   .insert(Ball);
 }
 
@@ -43,5 +43,20 @@ fn ball_movement (
 ) {
   for (ball, transform) in q.iter_mut() {
     
+  }
+}
+
+fn detect_collisions(
+  mut q: Query<(Entity, &mut Velocity), With<Ball>>,
+  mut events: EventReader<CollisionEvent>
+) {
+  for event in events.iter() {
+    if let CollisionEvent::Started(data1, data2) = event {
+      for (ball, mut velocity) in q.iter_mut() {
+        if ball == data1.rigid_body_entity() || ball == data2.rigid_body_entity() {
+          velocity.linear = velocity.linear + Vec3::new(40., 5., 1.);
+        }
+      }
+    };
   }
 }
