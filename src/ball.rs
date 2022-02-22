@@ -48,6 +48,7 @@ fn ball_movement (
 }
 
 fn detect_collisions(
+  time: Res<Time>,
   mut q: Query<(Entity, &mut Velocity), With<Ball>>,
   mut events: EventReader<CollisionEvent>
 ) {
@@ -58,7 +59,7 @@ fn detect_collisions(
         if ball == data1.rigid_body_entity() || ball == data2.rigid_body_entity() {
           let normal = data2.normals().first().unwrap();
           println!("velocity: {:?}", velocity.linear);
-          velocity.linear = Vec3::new(normal.x, normal.y, 1.) * 100. * (1./60.);
+          velocity.linear = Vec3::new(normal.x, normal.y, 1.) * 1000. * time.delta_seconds();
         }
       }
     };

@@ -22,6 +22,7 @@ fn player_setup (
 }
 
 fn player_movement (
+  time: Res<Time>,
   keyboard_input: Res<Input<KeyCode>>,
   mut query: Query<(&mut Player, &mut Velocity), With<Paddle>>,
 ) {
@@ -34,7 +35,7 @@ fn player_movement (
       0.
     };
     // println!("velocity before: {:?}", velocity.linear);
-    velocity.linear = Vec3::Y * dir * 1000. * (1. / 60.);
+    velocity.linear = Vec3::Y * dir * 1000. * time.delta_seconds();
     // println!("velocity after: {:?}", velocity.linear);
   }
 }
