@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 
+mod input;
 mod physics;
 mod camera;
 mod ball;
@@ -9,6 +10,13 @@ mod player;
 mod adversary;
 mod level;
 mod ui;
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+enum GameState {
+  Start,
+  Playing,
+}
+
 
 fn main() {
   App::new()
@@ -22,10 +30,12 @@ fn main() {
     )
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .add_plugins(DefaultPlugins)
+    .add_state(GameState::Start)
     .add_plugin(WorldInspectorPlugin::new())
     .add_plugin(physics::AppPhysicsPlugin)
     .add_plugin(camera::CameraPlugin)
     .add_plugin(ui::UIPlugin)
+    .add_plugin(input::InputPlugin)
     .add_plugin(level::LevelPlugin)
     .add_plugin(ball::BallPlugin)
     .add_plugin(player::PlayerPlugin)
