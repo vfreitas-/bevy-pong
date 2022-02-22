@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use heron::prelude::*;
 use crate::physics::Layer;
+use crate::GameState;
 
 pub struct BallPlugin;
 
@@ -8,7 +9,14 @@ impl Plugin for BallPlugin {
   fn build(&self, app: &mut App) {
     app
       .add_startup_system(setup)
-      .add_system(detect_collisions);
+      .add_system_set(
+        SystemSet::on_enter(GameState::Playing)
+          .with_system(ball_impulse)
+      )
+      .add_system_set(
+        SystemSet::on_update(GameState::Playing)
+          .with_system(ball_detect_collisions)
+      );
   }
 }
 
@@ -27,8 +35,8 @@ fn setup (mut commands: Commands) {
   )
   .insert(RigidBody::Dynamic)
   .insert(CollisionShape::Sphere { radius: 0.75 })
-  .insert(Velocity::from_linear(Vec3::X * 10.0))
-  .insert(Acceleration::from_linear(Vec3::new(1., 1., 1.)))
+  .insert(Velocity::from_linear(Vec3::ZERO))
+  .insert(Acceleration::from_linear(Vec3::ZERO))
   .insert(PhysicMaterial { friction: 1.0, density: 10.0, ..Default::default() })
   .insert(RotationConstraints::lock())
   .insert(CollisionLayers::none()
@@ -38,16 +46,15 @@ fn setup (mut commands: Commands) {
   .insert(Ball);
 }
 
-fn ball_movement (
-  mut commands: Commands,
-  mut q: Query<(&mut Ball, &mut Transform)>
+fn ball_impulse (
+  mut q: Query<&mut Velocity, With<Ball>>
 ) {
-  for (ball, transform) in q.iter_mut() {
-    
+  for mut velocity in q.iter_mut() {
+    velocity.linear = Vec3::X * 10.0;
   }
 }
 
-fn detect_collisions(
+fn ball_detect_collisions(
   time: Res<Time>,
   mut q: Query<(Entity, &mut Velocity), With<Ball>>,
   mut events: EventReader<CollisionEvent>
