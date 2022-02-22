@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use heron::prelude::*;
+
+use crate::physics::Layer;
 
 pub struct LevelPlugin;
 
@@ -26,6 +29,20 @@ fn level_setup (
         },
         ..Default::default()
       }
+    )
+    .insert(RigidBody::Static)
+    .insert(CollisionShape::Cuboid { 
+      half_extends: Vec3::new(26.5, 0.5, 1.0),
+      border_radius: None
+    })
+    .insert(PhysicMaterial { 
+      friction: 0.0,
+      density: 9999.0,
+      restitution: 1.0,
+    })
+    .insert(CollisionLayers::none()
+      .with_group(Layer::World)
+      .with_masks(&[Layer::Ball, Layer::Paddle])
     );
 
   commands
@@ -42,5 +59,20 @@ fn level_setup (
         },
         ..Default::default()
       }
+    )
+    .insert(RigidBody::Static)
+    .insert(CollisionShape::Cuboid { 
+      half_extends: Vec3::new(26.5, 0.5, 1.0),
+      border_radius: None
+    })
+    .insert(PhysicMaterial { 
+      friction: 0.0,
+      density: 9999.0,
+      restitution: 1.0,
+    })
+    .insert(RotationConstraints::lock())
+    .insert(CollisionLayers::none()
+      .with_group(Layer::World)
+      .with_masks(&[Layer::Ball, Layer::Paddle])
     );
 }
