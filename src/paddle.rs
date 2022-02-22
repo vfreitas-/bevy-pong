@@ -24,7 +24,7 @@ pub fn spawn_paddle (
       ..Default::default()
     }
   )
-  .insert(RigidBody::Dynamic)
+  .insert(RigidBody::KinematicVelocityBased)
   .insert(CollisionShape::Cuboid { 
     half_extends: Vec3::new(0.5, 2.5, 1.0),
     border_radius: None
@@ -39,8 +39,7 @@ pub fn spawn_paddle (
   .insert(RotationConstraints::lock())
   .insert(CollisionLayers::none()
     .with_group(Layer::Paddle)
-    .with_mask(Layer::World)
-    .with_mask(Layer::Ball))
+    .with_masks(&[Layer::World, Layer::Ball]))
   .insert(Paddle)
   .insert(component);
 }
