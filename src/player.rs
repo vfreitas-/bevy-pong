@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use heron::Velocity;
 use crate::paddle::*;
+use crate::GameState;
 
 pub struct PlayerPlugin;
 
@@ -8,7 +9,10 @@ impl Plugin for PlayerPlugin {
   fn build(&self, app: &mut App) {
     app
       .add_startup_system(player_setup)
-      .add_system(player_movement);
+      .add_system_set(
+        SystemSet::on_update(GameState::Playing)
+          .with_system(player_movement)
+      );
   }
 }
 
