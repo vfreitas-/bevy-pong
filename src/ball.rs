@@ -122,7 +122,6 @@ fn ball_detect_collisions(
             }
           }
           ball.target = get_bounce(velocity.linear, *data2.normals().first().unwrap()) * 100.;
-          // velocity.linear = get_bounce(velocity.linear, *data2.normals().first().unwrap());
           return;
         }
       }
