@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use heron::prelude::*;
+use crate::level::GoalLine;
 use crate::physics::Layer;
 use crate::GameState;
 
@@ -41,34 +42,64 @@ fn setup (mut commands: Commands) {
   .insert(RotationConstraints::lock())
   .insert(CollisionLayers::none()
     .with_group(Layer::Ball)
-    .with_masks(&[Layer::World, Layer::Paddle])
+    .with_masks(&[Layer::World, Layer::Paddle, Layer::GoalLine])
   )
   .insert(Ball);
 }
 
 fn ball_impulse (
-  mut q: Query<&mut Velocity, With<Ball>>
+  mut q: Query<(&mut Velocity, &mut Transform), With<Ball>>
 ) {
-  for mut velocity in q.iter_mut() {
-    velocity.linear = Vec3::X * 10.0;
+  for (mut velocity, mut transform) in q.iter_mut() {
+    let rand = rand::random::<f32>();
+    transform.translation = Vec3::new(0., 0., 1.);
+    velocity.linear = Vec3::X * 15.;
+    // velocity.linear = Vec3::new(rand * 20., rand * 20., 1.);
   }
 }
 
 fn ball_detect_collisions(
   time: Res<Time>,
-  mut q: Query<(Entity, &mut Velocity), With<Ball>>,
-  mut events: EventReader<CollisionEvent>
+  mut commands: Commands,
+  mut qBall: Query<(Entity, &mut Velocity), With<Ball>>,
+  mut qGoalLine: Query<(Entity, &mut GoalLine)>,
+  mut events: EventReader<CollisionEvent>,
 ) {
   for event in events.iter() {
     if let CollisionEvent::Started(data1, data2) = event {
-      // println!("event: {:?}", data1);
-      for (ball, mut velocity) in q.iter_mut() {
+      let layers1 = data1.collision_layers();
+      let layers2 = data2.collision_layers();
+
+      for (ball, mut velocity) in qBall.iter_mut() {
         if ball == data1.rigid_body_entity() || ball == data2.rigid_body_entity() {
-          let normal = data2.normals().first().unwrap();
-          println!("velocity: {:?}", velocity.linear);
-          velocity.linear = Vec3::new(normal.x, normal.y, 1.) * 1000. * time.delta_seconds();
+
+          if layers1.contains_group(Layer::GoalLine) || layers2.contains_group(Layer::GoalLine) {
+            // score
+            // data1.rigid_body_entity()
+          }
+
+          for (goalline_entity, goalline) in qGoalLine.iter() {
+            if data1.rigid_body_entity() == goalline_entity || data2.rigid_body_entity() == goalline_entity {
+              println!("Goal!!!! from : {:?}", goalline.side);
+              return;
+            }
+          }
+
+          velocity.linear = get_bounce(velocity.linear, *data2.normals().first().unwrap());
         }
       }
     };
   }
+}
+
+fn get_bounce (
+  current_velocity: Vec3,
+  normal: Vec2,
+) -> Vec3 {
+  let normal = normal.normalize();
+  let velocity = Vec2::new(current_velocity.x, current_velocity.y);
+  let dot = velocity.dot(normal);
+  let reflect = 2. * normal * dot - velocity;
+  let bounce = -reflect;
+  return Vec3::new(bounce.x, bounce.y, 1.);
 }
