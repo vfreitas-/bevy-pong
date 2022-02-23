@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{GameState, level::GoalLineSide};
+use crate::{level::GoalLineSide};
 
 pub struct OnScore(pub GoalLineSide);
 

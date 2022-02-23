@@ -10,7 +10,6 @@ use crate::score::*;
 
 #[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum BallLabel {
-  Start,
   Movement,
   Collision,
 }
@@ -69,10 +68,9 @@ fn setup (mut commands: Commands) {
 }
 
 fn ball_initialize (
-  mut q: Query<(&mut Velocity, &mut Transform, &mut Ball)>
+  mut q: Query<(&mut Transform, &mut Ball)>
 ) {
   for (
-    mut velocity,
     mut transform,
     mut ball
   ) in q.iter_mut() {
@@ -103,17 +101,17 @@ fn ball_movement (
 }
 
 fn ball_detect_collisions(
-  mut qBall: Query<(Entity, &mut Ball, &mut Velocity)>,
-  mut qGoalLine: Query<(Entity, &mut GoalLine)>,
+  mut q_ball: Query<(Entity, &mut Ball, &Velocity)>,
+  q_goal_line: Query<(Entity, &mut GoalLine)>,
   mut events: EventReader<CollisionEvent>,
   mut on_score_writer: EventWriter<OnScore>,
 
 ) {
   for event in events.iter() {
     if let CollisionEvent::Started(data1, data2) = event {
-      for (entity, mut ball, mut velocity) in qBall.iter_mut() {
+      for (entity, mut ball, velocity) in q_ball.iter_mut() {
         if entity == data1.rigid_body_entity() || entity == data2.rigid_body_entity() {
-          for (goalline_entity, goalline) in qGoalLine.iter() {
+          for (goalline_entity, goalline) in q_goal_line.iter() {
             if data1.rigid_body_entity() == goalline_entity || data2.rigid_body_entity() == goalline_entity {
               if GoalLineSide::Left == goalline.side {
                 on_score_writer.send(OnScore(GoalLineSide::Left));
