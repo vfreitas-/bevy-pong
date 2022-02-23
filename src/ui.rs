@@ -1,12 +1,21 @@
 use bevy::prelude::*;
+
+use crate::score::Scoreboard;
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
   fn build(&self, app: &mut App) {
     app
-      .add_startup_system(hud_setup);
+      .add_startup_system(hud_setup)
+      .add_system(ui_update_score_text);
   }
 }
+
+#[derive(Component, Debug)]
+pub struct UIPlayerLeftScore;
+
+#[derive(Component, Debug)]
+pub struct UIPlayerRightScore;
 
 fn hud_setup (
   mut commands: Commands,
@@ -57,7 +66,9 @@ fn hud_setup (
           ),
           ..Default::default()
         }
-      );
+      )
+      .insert(UIPlayerLeftScore);
+
       parent.spawn_bundle(
         TextBundle {
           text: Text::with_section(
@@ -91,7 +102,24 @@ fn hud_setup (
           ),
           ..Default::default()
         }
-      );
+      )
+      .insert(UIPlayerRightScore);
     });
   });
+}
+
+fn ui_update_score_text (
+  scoreboard: Res<Scoreboard>,
+  mut q: QuerySet<(
+    QueryState<&mut Text, With<UIPlayerLeftScore>>,
+    QueryState<&mut Text, With<UIPlayerRightScore>>
+  )>,
+) {
+  for mut text in q.q0().iter_mut() {
+    text.sections[0].value = format!("{:02}", scoreboard.player_left);
+  }
+
+  for mut text in q.q1().iter_mut() {
+    text.sections[0].value = format!("{:02}", scoreboard.player_right);
+  }
 }
