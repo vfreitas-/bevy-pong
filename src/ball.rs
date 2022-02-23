@@ -1,10 +1,19 @@
 use bevy::prelude::*;
 use heron::prelude::*;
+use rand::Rng;
+use crate::BALL_SPEED;
 use crate::level::GoalLine;
 use crate::level::GoalLineSide;
 use crate::physics::Layer;
 use crate::GameState;
 use crate::score::*;
+
+#[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
+pub enum BallLabel {
+  Start,
+  Movement,
+  Collision,
+}
 
 pub struct BallPlugin;
 
@@ -14,17 +23,27 @@ impl Plugin for BallPlugin {
       .add_startup_system(setup)
       .add_system_set(
         SystemSet::on_enter(GameState::Playing)
-          .with_system(ball_impulse)
+          .with_system(ball_initialize)
       )
       .add_system_set(
         SystemSet::on_update(GameState::Playing)
-          .with_system(ball_detect_collisions)
+          .with_system(
+            ball_detect_collisions
+              .label(BallLabel::Collision)
+            )
+          .with_system(
+            ball_movement
+              .label(BallLabel::Movement)
+              .after(BallLabel::Collision)
+          )
       );
   }
 }
 
 #[derive(Component)]
-struct Ball;
+struct Ball {
+  target: Vec3,
+}
 
 fn setup (mut commands: Commands) {
   commands.spawn_bundle(
@@ -46,24 +65,45 @@ fn setup (mut commands: Commands) {
     .with_group(Layer::Ball)
     .with_masks(&[Layer::World, Layer::Paddle, Layer::GoalLine])
   )
-  .insert(Ball);
+  .insert(Ball { target: Vec3::ZERO });
 }
 
-fn ball_impulse (
-  mut q: Query<(&mut Velocity, &mut Transform), With<Ball>>
+fn ball_initialize (
+  mut q: Query<(&mut Velocity, &mut Transform, &mut Ball)>
 ) {
-  for (mut velocity, mut transform) in q.iter_mut() {
-    let rand = rand::random::<f32>();
+  for (
+    mut velocity,
+    mut transform,
+    mut ball
+  ) in q.iter_mut() {
+    let rand_x = rand::thread_rng().gen_range(-1., 1.);
+    let rand_y = rand::thread_rng().gen_range(-1., 1.);
+    let direction = Vec3::new(rand_x, rand_y, 1.);
+    ball.target = direction.normalize() * 100.;
     transform.translation = Vec3::new(0., 0., 1.);
-    velocity.linear = Vec3::X * 15.;
-    // velocity.linear = Vec3::new(rand * 20., rand * 20., 1.);
+  }
+}
+
+fn ball_movement (
+  time: Res<Time>,
+  mut q: Query<(&mut Velocity, &Transform, &Ball)>
+) {
+  for (
+    mut velocity,
+    transform,
+    ball
+  ) in q.iter_mut() {
+    let direction = Vec3::new(
+      ball.target.x - transform.translation.x, 
+      ball.target.y - transform.translation.y, 1.
+    ).normalize();
+
+    velocity.linear = direction * BALL_SPEED * time.delta_seconds();
   }
 }
 
 fn ball_detect_collisions(
-  time: Res<Time>,
-  mut commands: Commands,
-  mut qBall: Query<(Entity, &mut Velocity), With<Ball>>,
+  mut qBall: Query<(Entity, &mut Ball, &mut Velocity)>,
   mut qGoalLine: Query<(Entity, &mut GoalLine)>,
   mut events: EventReader<CollisionEvent>,
   mut on_score_writer: EventWriter<OnScore>,
@@ -71,11 +111,8 @@ fn ball_detect_collisions(
 ) {
   for event in events.iter() {
     if let CollisionEvent::Started(data1, data2) = event {
-      let layers1 = data1.collision_layers();
-      let layers2 = data2.collision_layers();
-
-      for (ball, mut velocity) in qBall.iter_mut() {
-        if ball == data1.rigid_body_entity() || ball == data2.rigid_body_entity() {
+      for (entity, mut ball, mut velocity) in qBall.iter_mut() {
+        if entity == data1.rigid_body_entity() || entity == data2.rigid_body_entity() {
           for (goalline_entity, goalline) in qGoalLine.iter() {
             if data1.rigid_body_entity() == goalline_entity || data2.rigid_body_entity() == goalline_entity {
               if GoalLineSide::Left == goalline.side {
@@ -86,8 +123,9 @@ fn ball_detect_collisions(
               return;
             }
           }
-
-          velocity.linear = get_bounce(velocity.linear, *data2.normals().first().unwrap());
+          ball.target = get_bounce(velocity.linear, *data2.normals().first().unwrap()) * 100.;
+          // velocity.linear = get_bounce(velocity.linear, *data2.normals().first().unwrap());
+          return;
         }
       }
     };

@@ -19,6 +19,7 @@ enum GameState {
 }
 
 const PADDLE_SPEED: f32 = 1300.;
+const BALL_SPEED: f32 = 1600.;
 
 fn main() {
   App::new()
