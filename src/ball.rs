@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use heron::prelude::*;
 use crate::level::GoalLine;
+use crate::level::GoalLineSide;
 use crate::physics::Layer;
 use crate::GameState;
+use crate::score::*;
 
 pub struct BallPlugin;
 
@@ -64,6 +66,8 @@ fn ball_detect_collisions(
   mut qBall: Query<(Entity, &mut Velocity), With<Ball>>,
   mut qGoalLine: Query<(Entity, &mut GoalLine)>,
   mut events: EventReader<CollisionEvent>,
+  mut on_score_writer: EventWriter<OnScore>,
+
 ) {
   for event in events.iter() {
     if let CollisionEvent::Started(data1, data2) = event {
@@ -72,15 +76,13 @@ fn ball_detect_collisions(
 
       for (ball, mut velocity) in qBall.iter_mut() {
         if ball == data1.rigid_body_entity() || ball == data2.rigid_body_entity() {
-
-          if layers1.contains_group(Layer::GoalLine) || layers2.contains_group(Layer::GoalLine) {
-            // score
-            // data1.rigid_body_entity()
-          }
-
           for (goalline_entity, goalline) in qGoalLine.iter() {
             if data1.rigid_body_entity() == goalline_entity || data2.rigid_body_entity() == goalline_entity {
-              println!("Goal!!!! from : {:?}", goalline.side);
+              if GoalLineSide::Left == goalline.side {
+                on_score_writer.send(OnScore(GoalLineSide::Left));
+              } else if GoalLineSide::Right == goalline.side {
+                on_score_writer.send(OnScore(GoalLineSide::Right));
+              }
               return;
             }
           }
