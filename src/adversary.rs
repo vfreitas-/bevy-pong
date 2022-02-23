@@ -2,6 +2,11 @@ use bevy::prelude::*;
 use heron::Velocity;
 use crate::{paddle::*, GameState, PADDLE_SPEED};
 
+//
+// This is a separate module because the adversary could be:
+// 1 - Another player (done)
+// 2 - Controlled by AI (to do)
+// 
 pub struct AdversaryPlugin;
 
 impl Plugin for AdversaryPlugin {
