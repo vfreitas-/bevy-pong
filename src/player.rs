@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use heron::Velocity;
+use crate::PADDLE_SPEED;
 use crate::paddle::*;
 use crate::GameState;
 
@@ -28,9 +29,9 @@ fn player_setup (
 fn player_movement (
   time: Res<Time>,
   keyboard_input: Res<Input<KeyCode>>,
-  mut query: Query<(&mut Player, &mut Velocity), With<Paddle>>,
+  mut query: Query<&mut Velocity, With<Player>>,
 ) {
-  if let Some((mut player, mut velocity)) = query.iter_mut().next() {
+  if let Some(mut velocity) = query.iter_mut().next() {
     let dir = if keyboard_input.pressed(KeyCode::Up) {
       1.
     } else if keyboard_input.pressed(KeyCode::Down) {
@@ -38,8 +39,7 @@ fn player_movement (
     } else {
       0.
     };
-    // println!("velocity before: {:?}", velocity.linear);
-    velocity.linear = Vec3::Y * dir * 1000. * time.delta_seconds();
-    // println!("velocity after: {:?}", velocity.linear);
+
+    velocity.linear = Vec3::Y * dir * PADDLE_SPEED * time.delta_seconds();
   }
 }
