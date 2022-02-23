@@ -9,6 +9,7 @@ mod paddle;
 mod player;
 mod adversary;
 mod level;
+mod score;
 mod ui;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -37,6 +38,7 @@ fn main() {
     .add_plugin(ui::UIPlugin)
     .add_plugin(input::InputPlugin)
     .add_plugin(level::LevelPlugin)
+    .add_plugin(score::ScorePlugin)
     .add_plugin(ball::BallPlugin)
     .add_plugin(player::PlayerPlugin)
     .add_plugin(adversary::AdversaryPlugin)
