@@ -12,11 +12,19 @@ impl Plugin for LevelPlugin {
   }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum GoalLineSide {
+  Left,
+  Right,
+}
+
 #[derive(Component)]
 struct Block;
 
 #[derive(Component)]
-struct GoalLine;
+pub struct GoalLine {
+  pub side: GoalLineSide,
+}
 
 fn level_setup (
   mut commands: Commands,
@@ -105,9 +113,9 @@ fn level_setup (
   })
   .insert(CollisionLayers::none()
     .with_group(Layer::GoalLine)
-    // .with_masks(&[Layer::Ball, Layer::Paddle])
+    .with_masks(&[Layer::Ball])
   )
-  .insert(GoalLine);
+  .insert(GoalLine { side: GoalLineSide::Left });
 
   commands.spawn_bundle(
     SpriteBundle {
@@ -130,7 +138,7 @@ fn level_setup (
   })
   .insert(CollisionLayers::none()
     .with_group(Layer::GoalLine)
-    // .with_masks(&[Layer::Ball, Layer::Paddle])
+    .with_masks(&[Layer::Ball])
   )
-  .insert(GoalLine);
+  .insert(GoalLine { side: GoalLineSide::Right });
 }
